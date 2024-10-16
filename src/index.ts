@@ -8,6 +8,8 @@ import { buildSchema } from "type-graphql"
 import { HelloResolver } from "./resolvers/photo"
 import { SpellResolver } from "./resolvers/spell"
 
+// opasdfpaosdfk
+
 const main = async () => {
   // The ApolloServer constructor requires two parameters: your schema
   // definition and your set of resolvers.
