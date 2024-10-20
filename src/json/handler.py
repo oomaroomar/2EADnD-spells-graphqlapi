@@ -4,13 +4,17 @@ import json
 f = open('wizard.json')
 wSpells = json.load(f)
 f.close()
-newWSpells = {}
+newSpells = []
 
 for s in wSpells:
-    key =  s['school'] + ' - ' + s['name']
-    newWSpells[key] = s
+    newSpell = s
+    newSpell['savingThrow'] = s['save']
+    del newSpell['save']
+    if 'errata' in newSpell:
+        del newSpell['errata']
+    newSpells.append(newSpell)
 
 with open('wizards.json', 'w') as fp:
-    json.dump(newWSpells, fp, ensure_ascii=True, indent=4)
+    json.dump(newSpells, fp, ensure_ascii=True, indent=4)
 
 fp.close()
