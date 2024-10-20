@@ -7,8 +7,7 @@ import { Spell } from "./entities/Spell"
 import { buildSchema } from "type-graphql"
 import { HelloResolver } from "./resolvers/photo"
 import { SpellResolver } from "./resolvers/spell"
-
-// opasdfpaosdfk
+import { errorFormatter } from "./lib/errorFormatter"
 
 const main = async () => {
   // The ApolloServer constructor requires two parameters: your schema
@@ -33,7 +32,9 @@ const main = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, SpellResolver],
+      validate: {forbidUnknownValues: false}
     }),
+    formatError: errorFormatter,
   })
 
   const { url } = await startStandaloneServer(server, {

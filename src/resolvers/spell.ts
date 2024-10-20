@@ -1,5 +1,5 @@
 import { Spell } from "../entities/Spell"
-import { School, Sphere, Caster, Save, Book } from "src/types"
+import { SpellInput } from "../types"
 import {
   Arg,
   Args,
@@ -13,75 +13,26 @@ import {
 
 // Jump down to line 60
 
-@InputType()
-class SpellInput {
-  @Field()
-  level!: number
-
-  @Field()
-  name!: string
-
-  @Field()
-  school: School
-
-  @Field()
-  sphere: Sphere
-
-  @Field()
-  class!: Caster
-
-  @Field()
-  verbal!: boolean
-
-  @Field()
-  somatic!: boolean
-
-  @Field()
-  material!: boolean
-
-  @Field()
-  materials: string
-
-  @Field()
-  range: string
-
-  @Field()
-  aoe: string
-
-  @Field()
-  castingTime: number
-
-  @Field()
-  duration: string
-
-  @Field()
-  savingThrow: Save
-
-  @Field()
-  damage: string
-
-  @Field()
-  description: string
-
-  @Field()
-  source: Book
-}
 
 @Resolver(Spell)
 export class SpellResolver {
   @Query(() => Spell)
-  async spell(
+  async getSpellByID(
     @Arg("id", () => Int) id: number,
-    @Arg("name", () => String) name: string
   ): Promise<Spell | null> {
-    if (id) {
-      return Spell.findOneBy({ id })
-    }
-    return Spell.findOneBy({ name })
+    return Spell.findOneBy({ id })
+  }
+
+  @Query(() => [Spell])
+  async getSpellByName(
+    @Arg("name", () => String) name: string
+  ): Promise<Spell[] | null> {
+    return Spell.findBy({ name })
   }
 
   @Mutation(() => Spell)
-  async createSpell(@Arg("spellInfo") spellInfo: SpellInput): Promise<Spell> {
+  async createSpell(@Arg("spellInfo") spellInfo: SpellInput): Promise<Spell | null> {
+    console.log(spellInfo)
     return Spell.create({ ...spellInfo }).save()
   }
 }

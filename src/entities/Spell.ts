@@ -55,7 +55,7 @@ export class Spell extends BaseEntity {
 
   @Field()
   @Column()
-  castingTime: number
+  castingTime: string
 
   @Field()
   @Column()

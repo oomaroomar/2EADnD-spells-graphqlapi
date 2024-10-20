@@ -1,0 +1,20 @@
+[
+  {
+    "level": 1,
+    "name": "Allure",
+    "school": "Alteration",
+    "class": "Wizard",
+    "verbal": false,
+    "somatic": true,
+    "material": true,
+    "materials": "Soap and water",
+    "range": "Self",
+    "aoe": "Self",
+    "castingTime": "Variable",
+    "duration": "Special",
+    "save": "None",
+    "damage": "",
+    "description": "To cast this spell, the transmuter must wash themselves in soap and water, creating a plethora of bubbles which they then cover themselves with. The washing process is magical. Any normal soap will be extra sudsy, helping to facilitate the process.\n\n\nWhen the wizard is done with washing, any area that retains bubbles is covered with a spell that increases one's perceived attractiveness. It should be noted that attractiveness is not the same as charisma, and this spell has no effect on one's charisma. For purposes of this spell, attractiveness is a non-standard stat based on a 3d6 roll, and this spell increases one's attractiveness to a minimum of 15, or by 1d4, whichever is higher. A character may not exceed 18 hotness.\n\nAllure persists until the caster speaks or makes any verbal sound. The spell similarly fails if the bubbles are washed off, or if the caster falls asleep.  Should this spell be dispelled, the change is instant. All people viewing the subject see the transformation instantly. It is made even more apparent by the fact the caster is probably still covered in bubbles.\n\nSomeone making physical contact with an Allured section of the caster (i.e. an area covered by unseen magic bubbles) will feel the bubbles, breaking them, and breaking the spell. ",
+    "source": "Koibu"
+  }
+]

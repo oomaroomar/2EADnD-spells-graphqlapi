@@ -4,6 +4,7 @@ import { Query, Resolver } from "type-graphql"
 export class HelloResolver {
   @Query(() => String)
   hello() {
+    console.log("hello")
     return "bye"
   }
 }
