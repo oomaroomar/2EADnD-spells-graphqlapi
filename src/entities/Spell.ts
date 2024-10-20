@@ -4,7 +4,7 @@ import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm"
 
 @Entity()
 @ObjectType()
-export class WizardSpell extends BaseEntity {
+export class Spell extends BaseEntity {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
   id!: number
@@ -72,13 +72,9 @@ export class WizardSpell extends BaseEntity {
   @Field()
   @Column()
   source: Book
-}
 
-@Entity()
-@ObjectType()
-export class PriestSpell extends WizardSpell {
-  @Field()
-  @Column()
+  @Field({nullable: true})
+  @Column({nullable: true})
   sphere: string
-
 }
+

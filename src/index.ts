@@ -3,10 +3,10 @@ import { ApolloServer } from "@apollo/server"
 import { startStandaloneServer } from "@apollo/server/standalone"
 import { DataSource } from "typeorm"
 import { Photo } from "./entities/Photo"
-import { WizardSpell } from "./entities/Spell"
+import { Spell } from "./entities/Spell"
 import { buildSchema } from "type-graphql"
 import { HelloResolver } from "./resolvers/photo"
-import { WizardSpellResolver } from "./resolvers/spell"
+import { SpellResolver } from "./resolvers/spell"
 import { errorFormatter } from "./lib/errorFormatter"
 
 const main = async () => {
@@ -22,7 +22,7 @@ const main = async () => {
     logging: true,
     // migrations: [path.join(__dirname, './migrations/*')],
     synchronize: true,
-    entities: [Photo, WizardSpell],
+    entities: [Photo, Spell],
   })
 
   await AppDataSource.initialize()
@@ -31,7 +31,7 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, WizardSpellResolver],
+      resolvers: [HelloResolver, SpellResolver],
       validate: {forbidUnknownValues: false}
     }),
     formatError: errorFormatter,

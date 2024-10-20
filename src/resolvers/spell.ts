@@ -1,5 +1,5 @@
-import { PriestSpell, WizardSpell } from "../entities/Spell"
-import { WizardSpellInput } from "../types"
+import { Spell } from "../entities/Spell"
+import { SpellInput } from "../types"
 import {
   Arg,
   Args,
@@ -13,81 +13,42 @@ import {
 
 // Jump down to line 60
 
-@Resolver(PriestSpell)
-export class PriestSpellResolver {
-  @Query(() => PriestSpell)
+
+@Resolver(Spell)
+export class SpellResolver {
+  @Query(() => Spell)
   async getSpellByID(
     @Arg("id", () => Int) id: number,
-  ): Promise<PriestSpell | null> {
-    return PriestSpell.findOneBy({ id })
+  ): Promise<Spell | null> {
+    return Spell.findOneBy({ id })
   }
 
-  @Query(() => [PriestSpell])
-  async getPriestSpellByName(
+  @Query(() => [Spell])
+  async getSpellByName(
     @Arg("name", () => String) name: string
-  ): Promise<PriestSpell[] | null> {
-    return PriestSpell.findBy({ name })
+  ): Promise<Spell[] | null> {
+    return Spell.findBy({ name })
   }
 
-  @Query(() => [WizardSpell])
-  async getAllWizardSpells(): Promise<WizardSpell[]> {
-    return WizardSpell.find()
+  @Query(() => [Spell])
+  async getAllSpells(): Promise<Spell[]> {
+    return Spell.find()
   }
 
-  @Mutation(() => WizardSpell)
-  async createWizardSpell(@Arg("spellInfo") spellInfo: WizardSpellInput): Promise<WizardSpell | null> {
-    return WizardSpell.create({ ...spellInfo }).save()
+  @Mutation(() => Spell)
+  async createSpell(@Arg("spellInfo") spellInfo: SpellInput): Promise<Spell | null> {
+    return Spell.create({ ...spellInfo }).save()
   }
 
-  @Mutation(() => [WizardSpell])
-  async createWizardSpells(@Arg("spellArray", () => [WizardSpellInput]) spellArray: WizardSpellInput[]): Promise<boolean> {
-    const savedSpells = spellArray.map(async spell => await WizardSpell.create({...spell}).save())
+  @Mutation(() => [Spell])
+  async createSpells(@Arg("spellArray", () => [SpellInput]) spellArray: SpellInput[]): Promise<boolean> {
+    const savedSpells = spellArray.map(async spell => await Spell.create({...spell}).save())
     return true
   }
 
-  @Mutation(() => WizardSpell)
-  async deleteWizardSpell(@Arg("id") id: number): Promise<boolean> {
-    await WizardSpell.delete({id})
-    return true
-  }
-
-}
-
-@Resolver(WizardSpell)
-export class WizardSpellResolver {
-  @Query(() => WizardSpell)
-  async getSpellByID(
-    @Arg("id", () => Int) id: number,
-  ): Promise<WizardSpell | null> {
-    return WizardSpell.findOneBy({ id })
-  }
-
-  @Query(() => [WizardSpell])
-  async getWizardSpellByName(
-    @Arg("name", () => String) name: string
-  ): Promise<WizardSpell[] | null> {
-    return WizardSpell.findBy({ name })
-  }
-
-  @Query(() => [WizardSpell])
-  async getAllWizardSpells(): Promise<WizardSpell[]> {
-    return WizardSpell.find()
-  }
-
-  @Mutation(() => WizardSpell)
-  async createWizardSpell(@Arg("spellInfo") spellInfo: WizardSpellInput): Promise<WizardSpell | null> {
-    return WizardSpell.create({ ...spellInfo }).save()
-  }
-
-  @Mutation(() => [WizardSpell])
-  async createWizardSpells(@Arg("spellArray", () => [WizardSpellInput]) spellArray: WizardSpellInput[]): Promise<boolean> {
-    const savedSpells = spellArray.map(async spell => await WizardSpell.create({...spell}).save())
-    return true
-  }
-
-  @Mutation(() => WizardSpell)
-  async deleteWizardSpell(@Arg("id") id: number): Promise<boolean> {
-    await WizardSpell.delete({id})
+  @Mutation(() => Spell)
+  async deleteSpell(@Arg("id") id: number): Promise<boolean> {
+    await Spell.delete({id})
     return true
   }
 }

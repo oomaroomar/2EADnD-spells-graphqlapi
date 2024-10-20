@@ -42,7 +42,7 @@ export type Sphere =
 
 
 @InputType()
-export class WizardSpellInput {
+export class SpellInput {
   @Field()
   level!: number
 
@@ -90,11 +90,7 @@ export class WizardSpellInput {
 
   @Field()
   source: Book
-}
 
-@InputType()
-export class PriestSpellInput extends WizardSpellInput {
-  
   @Field({nullable: true})
   sphere: string
 }
