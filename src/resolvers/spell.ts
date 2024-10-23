@@ -11,27 +11,25 @@ import {
   Resolver,
 } from "type-graphql"
 
-// Jump down to line 60
-
 
 @Resolver(Spell)
 export class SpellResolver {
   @Query(() => Spell)
-  async getSpellByID(
+  async spellByID(
     @Arg("id", () => Int) id: number,
   ): Promise<Spell | null> {
     return Spell.findOneBy({ id })
   }
 
   @Query(() => [Spell])
-  async getSpellByName(
+  async spellsByName(
     @Arg("name", () => String) name: string
   ): Promise<Spell[] | null> {
     return Spell.findBy({ name })
   }
 
   @Query(() => [Spell])
-  async getAllSpells(): Promise<Spell[]> {
+  async spells(): Promise<Spell[]> {
     return Spell.find()
   }
 
