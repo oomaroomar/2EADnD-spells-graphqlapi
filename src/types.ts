@@ -1,5 +1,10 @@
 import { InputType, Field } from "type-graphql"
 
+export interface Cursor {
+  name: string | null,
+  level: number | null
+}
+
 export type Book = "PHB" | "ToM" | "S&M" | string
 export type Save = "Negate" | "None" | "1/2" | "Special"
 export type Caster = "Wizard" | "Cleric"

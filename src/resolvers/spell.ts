@@ -1,15 +1,14 @@
+import "reflect-metadata"
 import { Spell } from "../entities/Spell"
 import { SpellInput } from "../types"
 import {
   Arg,
-  Args,
-  Field,
-  InputType,
   Int,
   Mutation,
   Query,
   Resolver,
 } from "type-graphql"
+import { Cursor } from "../types"
 
 
 @Resolver(Spell)
@@ -29,8 +28,12 @@ export class SpellResolver {
   }
 
   @Query(() => [Spell])
-  async spells(): Promise<Spell[]> {
-    return Spell.find()
+  async spells(
+    @Arg('limit') limit: number, 
+    @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
+    @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
+  ): Promise<Spell[]> {
+    return Spell.findSome({level: lvlOffset, name: nameOffset}, limit)
   }
 
   @Mutation(() => Spell)
