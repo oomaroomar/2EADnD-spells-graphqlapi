@@ -3,13 +3,22 @@ import { Spell } from "../entities/Spell"
 import { SpellInput } from "../types"
 import {
   Arg,
+  Field,
   Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
 } from "type-graphql"
-import { Cursor } from "../types"
 
+@ObjectType()
+class PaginatedSpells {
+  @Field(() => [Spell])
+  spells: Spell[]
+
+  @Field()
+  hasMore: boolean
+}
 
 @Resolver(Spell)
 export class SpellResolver {
@@ -27,13 +36,18 @@ export class SpellResolver {
     return Spell.findBy({ name })
   }
 
-  @Query(() => [Spell])
+
+  @Query(() => PaginatedSpells)
   async spells(
     @Arg('limit') limit: number, 
     @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
     @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
-  ): Promise<Spell[]> {
-    return Spell.findSome({level: lvlOffset, name: nameOffset}, limit)
+  ): Promise<PaginatedSpells> {
+    const spells = await Spell.findSome({level: lvlOffset, name: nameOffset}, limit + 1)
+    return {
+      spells: spells.slice(0, limit),
+      hasMore: spells.length === limit + 1
+    }
   }
 
   @Mutation(() => Spell)

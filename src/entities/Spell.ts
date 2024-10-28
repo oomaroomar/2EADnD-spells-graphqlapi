@@ -1,6 +1,6 @@
 import { Book, Caster, Save, School, Sphere } from "src/types"
 import { Field, ObjectType, Int } from "type-graphql"
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index, Brackets } from "typeorm"
 import { Cursor } from "src/types"
 
 @Entity()
@@ -79,11 +79,14 @@ export class Spell extends BaseEntity {
   @Field({nullable: true})
   @Column({nullable: true})
   sphere: string
-  // cursor: string | null, 
+
   static findSome(cursor: Cursor, limit: number) {
     return this.createQueryBuilder('spell')
-      .where(`spell.level  >= :lvl`, {lvl: cursor.level !== null ? cursor.level : 1})
-      .andWhere('spell.name > :name', {name: cursor.name !== null ? cursor.name : '' })
+      .where('spell.level  > :lvl', {lvl: cursor.level !== null ? cursor.level : 1})
+      .orWhere(new Brackets(qb => {
+        qb.where('spell.level  = :lvl', {lvl: cursor.level !== null ? cursor.level : 1})
+        .andWhere('spell.name > :name', {name: cursor.name !== null ? cursor.name : '' })
+      }))
       .orderBy('spell.level', 'ASC')
       .addOrderBy('spell.name', 'ASC')
       .take(limit)
