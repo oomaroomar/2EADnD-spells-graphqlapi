@@ -76,9 +76,9 @@ export class Spell extends BaseEntity {
   @Column()
   source: Book
 
-  @Field({nullable: true})
-  @Column({nullable: true})
-  sphere: string
+  @Field(() => [String], {nullable: true})
+  @Column({type: 'text', array: true, nullable: true})
+  spheres: string[]
 
   static findSome(cursor: Cursor, limit: number) {
     return this.createQueryBuilder('spell')

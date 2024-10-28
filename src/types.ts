@@ -96,6 +96,6 @@ export class SpellInput {
   @Field()
   source: Book
 
-  @Field({nullable: true})
-  sphere: string
+  @Field(() => [String],{nullable: true})
+  spheres: string[]
 }
