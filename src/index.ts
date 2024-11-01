@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { ApolloServer } from "@apollo/server"
 import { startStandaloneServer } from "@apollo/server/standalone"
+import { expressMiddleware } from '@apollo/server/express4'
 import { DataSource } from "typeorm"
 import { Photo } from "./entities/Photo"
 import { Spell } from "./entities/Spell"
@@ -8,6 +9,22 @@ import { buildSchema } from "type-graphql"
 import { HelloResolver } from "./resolvers/photo"
 import { SpellResolver } from "./resolvers/spell"
 import { errorFormatter } from "./lib/errorFormatter"
+import Redis from "ioredis"
+import session from "express-session"
+import RedisStore from 'connect-redis'
+import express from 'express'
+import cors from 'cors'
+import { MyContext } from "./types"
+import { __prod__ } from "./constants"
+import { User } from "./entities/User"
+import { UserResolver } from "./resolvers/user"
+
+declare module 'express-session' {
+  interface SessionData {
+    userId: number;
+  }
+}
+
 
 const main = async () => {
   // The ApolloServer constructor requires two parameters: your schema
@@ -22,8 +39,10 @@ const main = async () => {
     logging: true,
     // migrations: [path.join(__dirname, './migrations/*')],
     synchronize: true,
-    entities: [Photo, Spell],
+    entities: [Photo, Spell, User],
   })
+
+  const app = express()
 
   await AppDataSource.initialize()
     .then(() => console.log("Database connection established"))
@@ -31,17 +50,48 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, SpellResolver],
+      resolvers: [HelloResolver, SpellResolver, UserResolver],
       validate: {forbidUnknownValues: false}
     }),
     formatError: errorFormatter,
   })
 
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
+
+  const redis = new Redis()
+  const redisStore = new RedisStore({
+    client: redis,
+    prefix: '2e_sheet'
   })
 
-  console.log(`🚀  Server ready at: ${url}`)
+  await server.start()
+
+  app.use(session({
+    name: 'qid',
+    store: redisStore,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: __prod__
+    },
+    saveUninitialized: false,
+    resave: false,
+    secret: 'kitty kat'
+  }))
+
+  app.use('/graphql', 
+    cors<cors.CorsRequest>(),
+    express.json(),
+    expressMiddleware(server, {
+      context: async ({req, res}) => ({
+        req,
+        res,
+        redis
+      })
+    })
+  )
+
+  app.listen(4000, () => console.log('🚀 Server started on localhost:4000'))
 }
 
 main().catch((err) => console.log(err))

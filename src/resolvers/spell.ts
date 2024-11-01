@@ -42,8 +42,14 @@ export class SpellResolver {
     @Arg('limit') limit: number, 
     @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
     @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
+    @Arg('castingClass', () => String, {nullable: true}) castingClass: string | null
   ): Promise<PaginatedSpells> {
-    const spells = await Spell.findSome({level: lvlOffset, name: nameOffset}, limit + 1)
+    let spells;
+    if(castingClass === null) {
+      spells = await Spell.findSome({level: lvlOffset, name: nameOffset}, limit + 1)
+    } else {
+      spells = await Spell.findSomeClassSpells({level: lvlOffset, name: nameOffset}, limit + 1, castingClass)
+    }
     return {
       spells: spells.slice(0, limit),
       hasMore: spells.length === limit + 1
