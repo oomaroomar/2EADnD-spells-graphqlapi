@@ -1,9 +1,11 @@
 import { Request, Response } from "express"
+import { Redis } from "ioredis"
 import { InputType, Field } from "type-graphql"
 
 export type MyContext = {
   req: Request & {sessions: Express.SessionStore}
   res: Response
+  redis: Redis
 }
 
 

@@ -38,18 +38,37 @@ export class SpellResolver {
 
 
   @Query(() => PaginatedSpells)
-  async spells(
+  async clericSpells(
     @Arg('limit') limit: number, 
     @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
     @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
-    @Arg('castingClass', () => String, {nullable: true}) castingClass: string | null
   ): Promise<PaginatedSpells> {
-    let spells;
-    if(castingClass === null) {
-      spells = await Spell.findSome({level: lvlOffset, name: nameOffset}, limit + 1)
-    } else {
-      spells = await Spell.findSomeClassSpells({level: lvlOffset, name: nameOffset}, limit + 1, castingClass)
+    const spells = await Spell.findSomeClassSpells({level: lvlOffset, name: nameOffset}, limit + 1, 'Cleric')
+    return {
+      spells: spells.slice(0, limit),
+      hasMore: spells.length === limit + 1
     }
+  }
+  @Query(() => PaginatedSpells)
+  async wizardSpells(
+    @Arg('limit') limit: number, 
+    @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
+    @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
+  ): Promise<PaginatedSpells> {
+    const spells = await Spell.findSomeClassSpells({level: lvlOffset, name: nameOffset}, limit + 1, 'Wizard')
+    return {
+      spells: spells.slice(0, limit),
+      hasMore: spells.length === limit + 1
+    }
+  }
+
+  @Query(() => PaginatedSpells)
+  async allSpells(
+    @Arg('limit') limit: number, 
+    @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
+    @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
+  ): Promise<PaginatedSpells> {
+    const spells = await Spell.findSome({level: lvlOffset, name: nameOffset}, limit + 1)
     return {
       spells: spells.slice(0, limit),
       hasMore: spells.length === limit + 1

@@ -17,13 +17,13 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field()
+  @Field(() => String, {nullable: true})
   @Column({ unique: true })
   username!: string;
 
-  // @Field()
-  // @Column({ unique: true })
-  // email!: string;
+  @Field()
+  @Column({ unique: true, nullable: true })
+  email!: string;
 
   @Column()
   password!: string;
