@@ -129,6 +129,24 @@ import { sendEmail } from "../utils/sendEmail";
     }
   
     @Mutation(() => UserResponse)
+    async elevatePrivilege(
+      @Ctx(){req} : MyContext
+    ): Promise<UserResponse>{
+      const user = await User.findOneBy({id: req.session.userId})
+      const elevatedUser = await User.save({...user, isAdmin: true})
+      return {user: elevatedUser}
+    }
+    
+    @Mutation(() => UserResponse)
+    async removePrivilege(
+      @Ctx(){req} : MyContext
+    ): Promise<UserResponse>{
+      const user = await User.findOneBy({id: req.session.userId})
+      const elevatedUser = await User.save({...user, isAdmin: false})
+      return {user: elevatedUser}
+    }
+
+    @Mutation(() => UserResponse)
     async register(
       @Arg("options") options: UsernamePasswordInput,
       @Ctx() { req }: MyContext
@@ -182,8 +200,10 @@ import { sendEmail } from "../utils/sendEmail";
         };
       }
   
+
       req.session.userId = user.id;
-  
+      console.log(req.session)
+
       return {
         user,
       };

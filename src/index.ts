@@ -3,7 +3,6 @@ import { ApolloServer } from "@apollo/server"
 import { startStandaloneServer } from "@apollo/server/standalone"
 import { expressMiddleware } from '@apollo/server/express4'
 import { DataSource } from "typeorm"
-import { Photo } from "./entities/Photo"
 import { Spell } from "./entities/Spell"
 import { buildSchema } from "type-graphql"
 import { HelloResolver } from "./resolvers/photo"
@@ -18,6 +17,9 @@ import { MyContext } from "./types"
 import { __prod__ } from "./constants"
 import { User } from "./entities/User"
 import { UserResolver } from "./resolvers/user"
+import { SpellBook } from "./entities/SpellBook"
+import { Character } from "./entities/Character"
+import {SpellPage} from './entities/SpellPage'
 
 declare module 'express-session' {
   interface SessionData {
@@ -39,7 +41,7 @@ const main = async () => {
     logging: true,
     // migrations: [path.join(__dirname, './migrations/*')],
     synchronize: true,
-    entities: [Photo, Spell, User],
+    entities: [Spell, User, SpellBook, Character, SpellPage],
   })
 
   const app = express()
@@ -63,7 +65,10 @@ const main = async () => {
     prefix: '2e_sheet'
   })
 
-  await server.start()
+  app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+  }))
 
   app.use(session({
     name: 'qid',
@@ -72,15 +77,16 @@ const main = async () => {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,
       sameSite: 'lax',
-      secure: __prod__
+      secure: false
     },
     saveUninitialized: false,
     resave: false,
     secret: 'kitty kat'
   }))
 
+  await server.start()
+
   app.use('/graphql', 
-    cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, {
       context: async ({req, res}) => ({

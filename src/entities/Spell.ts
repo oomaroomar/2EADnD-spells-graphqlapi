@@ -1,7 +1,10 @@
-import { Book, Caster, Save, School, Sphere } from "src/types"
-import { Field, ObjectType, Int } from "type-graphql"
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index, Brackets } from "typeorm"
+import { Book, Caster, Save, School, SpellInput, Sphere } from "src/types"
+import { Field, ObjectType, Int, InputType } from "type-graphql"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index, Brackets, CreateDateColumn, UpdateDateColumn, ManyToMany, OneToMany } from "typeorm"
 import { Cursor } from "src/types"
+import { Character } from "./Character"
+import { SpellBook } from "./SpellBook"
+import { SpellPage } from "./SpellPage"
 
 
 // Index everything because data will be queries 10^6 times more often than it is mutated
@@ -95,6 +98,20 @@ export class Spell extends BaseEntity {
   @Index()
   @Column({type: 'text', array: true, nullable: true})
   spheres: string[]
+
+  @Field(() => String)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Field(() => String)
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ManyToMany(() => Character)
+  characters: Character[]
+
+  @ManyToMany(() => SpellBook)
+  spellBooks: SpellBook[]
 
   static findSome(cursor: Cursor, limit: number) {
     return this.createQueryBuilder('spell')

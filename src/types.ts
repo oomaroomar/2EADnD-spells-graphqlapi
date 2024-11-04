@@ -108,3 +108,9 @@ export class SpellInput {
   @Field(() => [String],{nullable: true})
   spheres: string[]
 }
+
+@InputType()
+export class SpellEditInput extends SpellInput {
+  @Field()
+  id!: number
+}

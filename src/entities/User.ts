@@ -8,6 +8,7 @@ import {
   BaseEntity,
   OneToMany,
 } from "typeorm";
+import { Character } from "./Character";
 import { Spell } from "./Spell";
 
 @ObjectType()
@@ -28,8 +29,15 @@ export class User extends BaseEntity {
   @Column()
   password!: string;
 
-//   @OneToMany(() => Spell, (post) => post.creator)
-//   spells: Spell[];
+  @Field()
+  @Column('boolean', {default: false})
+  isAdmin: boolean = false
+
+  @OneToMany(() => Character, (character) => character.owner)
+  characters: Character[];
+
+  @OneToMany(() => Spell, (spell) => spell.id)
+  homebrewSpells: Spell[];
 
   @Field(() => String)
   @CreateDateColumn()
