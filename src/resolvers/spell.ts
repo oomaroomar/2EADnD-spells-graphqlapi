@@ -71,9 +71,8 @@ export class SpellResolver {
     @Arg('limit') limit: number, 
     @Arg('lvlCursor', () => Number, {nullable: true}) lvlOffset: number | null,
     @Arg('nameCursor', () => String, {nullable: true}) nameOffset: string | null,
-    @Ctx() {req}: MyContext
+    // @Ctx() {req}: MyContext
   ): Promise<PaginatedSpells> {
-    console.log('session', req.session)
     const spells = await Spell.findSomeClassSpells({level: lvlOffset, name: nameOffset}, limit + 1, 'Wizard')
     return {
       spells: spells.slice(0, limit),
@@ -110,7 +109,6 @@ export class SpellResolver {
     const user = await User.findOneBy({id: req.session.userId})
     if(user?.isAdmin) {
       const updatedSpell = await Spell.save({...spellInfo})
-      console.log('updatedSpell', updatedSpell)
       return {spell: updatedSpell}
     } 
     return {error: "You do not have access to edit this spell"}

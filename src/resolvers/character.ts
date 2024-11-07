@@ -1,10 +1,10 @@
 import { Character } from "../entities/Character";
 import { User } from "../entities/User";
 import { MyContext } from "../types";
-import { validateRegister } from "src/utils/validateRegister";
-import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, ObjectType, Query, Resolver, Root } from "type-graphql";
-import { SpellEditResponse } from "./spell";
+import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { Spell } from "../entities/Spell";
+import { isAuth } from "src/middleware/isAuth";
+import { LearnedSpell } from "../entities/LearnedSpell";
 
 
 @ObjectType()
@@ -21,23 +21,9 @@ export class CharacterResolver {
     // learn spell
     // unlearn spell
 
-    @FieldResolver(() => [Spell], {nullable: true})
-    async spells(
-        @Root() character: Character, 
-        // @Ctx() {spellLoader}: MyContext
-    ): Promise<Spell[] | null> {
-        // console.log("inside spells resolver", character)
-        // const sIds = character.spells?.map(spell => spell.id)
-        // if(!sIds?.length) return null
-        // const stuff = await spellLoader.loadMany(sIds)
-        // console.log(stuff)
-        return character.spells ? character.spells : null
-
-    }
-
     @Query(() => Character, {nullable: true})
     async character(@Arg('cId') cId: number): Promise<Character | null> {
-        const character = await Character.findOne({where: { id: cId }, relations: {spells: true}})
+        const character = await Character.findOne({where: { id: cId }, relations: {learnedSpells: true}})
         console.log(character)
         return character
     }
@@ -51,18 +37,26 @@ export class CharacterResolver {
 
         const spell = await Spell.findOneBy({id: spellId})
         if(!spell) return {error: 'Could not find the spell you\'re looking for'}
-        const character = await Character.findOne({where: {id: characterId}, relations: {spells: true}})
+        const character = await Character.findOne({where: {id: characterId}, relations: {learnedSpells: true}})
         if(!character) return {error: 'Your mom'}
         
-        const oldSpells = character.spells ? character.spells : []
 
-        console.log(character.spells)
-        character.spells = oldSpells.concat([spell])
-        console.log(character)
-        const newCharacter = await Character.save({...character})
+        const learned = await LearnedSpell.createQueryBuilder()
+            .insert()
+            .into(LearnedSpell)
+            .values({
+                charId: characterId,
+                spellId: spellId
+            })
+            .execute()
 
-        console.log('What I am about to return', newCharacter)
-        return {character: newCharacter}
+        console.log(learned.raw)
+        const oldSpells = character.learnedSpells ? character.learnedSpells : []
+        // const newSpells = oldSpells.concat(learned.identifiers[0])
+
+        // const newCharacter = await Character.save({...character})
+
+        return {character}
     }
 
     @Mutation(() => CharacterResponse)
@@ -97,20 +91,19 @@ export class CharacterResolver {
         return true
     }
 
-    @Mutation(() => CharacterResponse)
-    async createCharacter(
-      @Arg("name") name: string,
-      @Ctx() { req }: MyContext
-    ): Promise<CharacterResponse> {
-        if(name.length === 0) return {error: 'Please provide a name'}
-        const user = await User.findOneBy({id: req.session.userId})
-        if(!user) return {error: 'Please sign in'}
+    // @Mutation(() => CharacterResponse)
+    // @UseMiddleware(isAuth)
+    // async createCharacter(
+    //   @Arg("name") name: string,
+    //   @Ctx() { req }: MyContext
+    // ): Promise<CharacterResponse> {
+    //     if(name.length === 0) return {error: 'Please provide a name'}
 
-        const newCharacter = await Character.save({
-            owner: user,
-            name: name,
-        })
+    //     const newCharacter = await Character.save({
+    //         owner: req.session.userId,
+    //         name: name,
+    //     })
 
-        return {character: newCharacter}
-    }
+    //     return {character: newCharacter}
+    // }
 }

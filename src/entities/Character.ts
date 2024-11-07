@@ -3,6 +3,7 @@ import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, Index, ManyToOne, M
 import { Spell } from "./Spell";
 import { User } from "./User";
 import { SpellBook } from "./SpellBook";
+import { LearnedSpell } from "./LearnedSpell";
 
 @ObjectType()
 @Entity()
@@ -19,10 +20,14 @@ export class Character extends BaseEntity {
     @Column()
     name!: string
 
-    @Field(() => [Spell], {nullable: true})
-    @ManyToMany(() => Spell, spell => spell.id, {nullable: true})
-    @JoinTable({name: 'character_spells'})
-    spells?: Spell[]
+    @Field(() => [LearnedSpell])
+    @OneToMany(() => LearnedSpell, ls => ls.character)
+    learnedSpells: LearnedSpell[]
+
+    // @Field(() => [Spell], {nullable: true})
+    // @ManyToMany(() => Spell, spell => spell.id, {nullable: true})
+    // @JoinTable({name: 'character_spells'})
+    // spells?: Spell[]
 
     @Field(() => [SpellBook], {nullable: true})
     @OneToMany(() => SpellBook, book => book.id, {nullable: true})

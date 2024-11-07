@@ -23,7 +23,7 @@ export class SpellBook extends BaseEntity {
     
     @Field(() => Spell)
     @ManyToMany(() => Spell, (spell) => spell.id)
-    @JoinTable()
+    @JoinTable({name: 'book_spells'})
     spells: Spell[]
 
     @Field()
