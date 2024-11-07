@@ -1,5 +1,5 @@
 import { ObjectType, Field } from "type-graphql";
-import { Entity, BaseEntity, PrimaryGeneratedColumn, ManyToOne, Column } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, ManyToOne, Column, Index } from "typeorm";
 import { Spell } from "./Spell";
 import { SpellBook } from "./SpellBook";
 
@@ -16,6 +16,7 @@ export class SpellPage extends BaseEntity {
 
     @Field(() => SpellBook)
     @ManyToOne(() => SpellBook, book => book.id)
+    @Index()
     spellBook: SpellBook
 
     @Field()

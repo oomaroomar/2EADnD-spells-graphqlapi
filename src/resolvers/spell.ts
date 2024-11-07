@@ -29,9 +29,9 @@ class AuthError {
 }
 
 @ObjectType()
-class SpellEditResponse {
+export class SpellEditResponse {
   @Field(() => String, {nullable: true})
-  errors?: string
+  error?: string
   
   @Field(() => Spell, {nullable: true})
   spell?: Spell
@@ -105,7 +105,7 @@ export class SpellResolver {
     @Ctx() {req}: MyContext
   ): Promise<SpellEditResponse> {
     if (!req.session.userId) {
-      return {errors: "You do not have access to edit this spell"}
+      return {error: "You do not have access to edit this spell"}
     }
     const user = await User.findOneBy({id: req.session.userId})
     if(user?.isAdmin) {
@@ -113,7 +113,7 @@ export class SpellResolver {
       console.log('updatedSpell', updatedSpell)
       return {spell: updatedSpell}
     } 
-    return {errors: "You do not have access to edit this spell"}
+    return {error: "You do not have access to edit this spell"}
   }
 
   @Mutation(() => [Spell])

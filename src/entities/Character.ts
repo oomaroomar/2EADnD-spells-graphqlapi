@@ -12,19 +12,20 @@ export class Character extends BaseEntity {
     id!: number;
     
     @ManyToOne(() => User, (user) => user.characters)
-    owner: User
+    @Index()
+    owner!: User
 
     @Field()
     @Column()
     name!: string
 
-    @Field(() => Spell)
-    @ManyToMany(() => Spell)
-    @JoinTable()
-    spells: Spell[]
+    @Field(() => [Spell], {nullable: true})
+    @ManyToMany(() => Spell, spell => spell.id, {nullable: true})
+    @JoinTable({name: 'character_spells'})
+    spells?: Spell[]
 
-    @Field(() => [SpellBook])
-    @OneToMany(() => SpellBook, book => book.id)
-    spellBooks: SpellBook[]
+    @Field(() => [SpellBook], {nullable: true})
+    @OneToMany(() => SpellBook, book => book.id, {nullable: true})
+    spellBooks?: SpellBook[]
 
 }

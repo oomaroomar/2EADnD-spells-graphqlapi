@@ -5,7 +5,6 @@ import { expressMiddleware } from '@apollo/server/express4'
 import { DataSource } from "typeorm"
 import { Spell } from "./entities/Spell"
 import { buildSchema } from "type-graphql"
-import { HelloResolver } from "./resolvers/photo"
 import { SpellResolver } from "./resolvers/spell"
 import { errorFormatter } from "./lib/errorFormatter"
 import Redis from "ioredis"
@@ -20,6 +19,8 @@ import { UserResolver } from "./resolvers/user"
 import { SpellBook } from "./entities/SpellBook"
 import { Character } from "./entities/Character"
 import {SpellPage} from './entities/SpellPage'
+import { CharacterResolver } from "./resolvers/character"
+import { createSpellLoader } from "./utils/createSpellLoader"
 
 declare module 'express-session' {
   interface SessionData {
@@ -52,7 +53,7 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, SpellResolver, UserResolver],
+      resolvers: [SpellResolver, UserResolver, CharacterResolver],
       validate: {forbidUnknownValues: false}
     }),
     formatError: errorFormatter,
@@ -92,7 +93,8 @@ const main = async () => {
       context: async ({req, res}) => ({
         req,
         res,
-        redis
+        redis,
+        spellLoader: createSpellLoader()
       })
     })
   )

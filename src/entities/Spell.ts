@@ -107,10 +107,10 @@ export class Spell extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Character)
+  @ManyToMany(() => Character, {nullable: true})
   characters: Character[]
 
-  @ManyToMany(() => SpellBook)
+  @ManyToMany(() => SpellBook, {nullable: true})
   spellBooks: SpellBook[]
 
   static findSome(cursor: Cursor, limit: number) {

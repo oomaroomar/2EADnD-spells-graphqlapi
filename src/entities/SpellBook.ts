@@ -13,10 +13,12 @@ export class SpellBook extends BaseEntity {
 
     @Field(() => Character)
     @ManyToOne(() => Character)
+    @Index()
     owner: Character
 
     @Field()
     @Column()
+    @Index()
     name!: string
     
     @Field(() => Spell)
