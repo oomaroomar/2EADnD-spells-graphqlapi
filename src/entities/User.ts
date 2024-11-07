@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { Character } from "./Character";
 import { Spell } from "./Spell";
+import { SpellBook } from "./SpellBook";
 
 @ObjectType()
 @Entity()
@@ -38,6 +39,10 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Spell, (spell) => spell.id)
   homebrewSpells: Spell[];
+
+  @Field(() => [SpellBook], {nullable: true})
+  @OneToMany(() => SpellBook, book => book.id, {nullable: true})
+  spellBooks?: SpellBook[]
 
   @Field(() => String)
   @CreateDateColumn()

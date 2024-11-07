@@ -20,6 +20,7 @@ import {SpellPage} from './entities/SpellPage'
 import { CharacterResolver } from "./resolvers/character"
 import { createSpellLoader } from "./utils/createSpellLoader"
 import { LearnedSpell } from "./entities/LearnedSpell"
+import { SpellBookResolver } from "./resolvers/spellBook"
 
 declare module 'express-session' {
   interface SessionData {
@@ -44,6 +45,7 @@ const main = async () => {
     entities: [Spell, User, SpellBook, Character, SpellPage, LearnedSpell],
   })
 
+
   const app = express()
 
   await AppDataSource.initialize()
@@ -52,7 +54,7 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [SpellResolver, UserResolver, CharacterResolver],
+      resolvers: [SpellResolver, UserResolver, CharacterResolver, SpellBookResolver],
       validate: {forbidUnknownValues: false}
     }),
     formatError: errorFormatter,
@@ -98,7 +100,7 @@ const main = async () => {
     })
   )
 
-  app.listen(4000, () => console.log('🚀 Server started on localhost:4000'))
+  app.listen(4000, () => console.log('🚀 Server started on http://localhost:4000/graphql'))
 }
 
 main().catch((err) => console.log(err))

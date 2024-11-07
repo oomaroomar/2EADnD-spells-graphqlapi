@@ -108,14 +108,11 @@ export class Spell extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Character, {nullable: true})
-  characters: Character[]
-
   @OneToMany(() => LearnedSpell, ls => ls.spellId)
   spellKnowers: LearnedSpell[]
 
-  @ManyToMany(() => SpellBook, {nullable: true})
-  spellBooks: SpellBook[]
+  @OneToMany(() => SpellPage, sp => sp.spell)
+  writtenCopies: SpellPage[]
 
   static findSome(cursor: Cursor, limit: number) {
     return this.createQueryBuilder('spell')

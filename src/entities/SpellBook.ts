@@ -1,8 +1,8 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Index, Column, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToOne, ManyToMany, JoinTable } from "typeorm";
-import { Spell } from "./Spell";
 import { Character } from "./Character";
 import { SpellPage } from "./SpellPage";
+import { User } from "./User";
 
 @ObjectType()
 @Entity()
@@ -11,37 +11,38 @@ export class SpellBook extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
+    @Field()
+    @Column()
+    @Index()
+    userOwnerId!: number
+
+    @Field(() => User)
+    @ManyToOne(() => User)
+    @Index()
+    userOwner!: User
+
+    @Field()
+    @Column()
+    @Index()
+    ownerId!: number
+
     @Field(() => Character)
     @ManyToOne(() => Character)
     @Index()
-    owner: Character
+    owner!: Character
 
-    @Field()
+    @Field(() => SpellPage, {nullable: true})
+    @OneToMany(() => SpellPage, sp => sp.book)
+    spellPages?: SpellPage
+
+    @Field(() => String)
     @Column()
     @Index()
     name!: string
     
-    @Field(() => Spell)
-    @ManyToMany(() => Spell, (spell) => spell.id)
-    @JoinTable({name: 'book_spells'})
-    spells: Spell[]
-
-    @Field()
-    @Column()
+    @Field(() => Int, {nullable: true})
+    @Column({nullable: true})
     maxPages: number
-
-    @Field()
-    @OneToMany(() => SpellPage, page => page.id)
-    spellPages: SpellPage
-
-    @Field(() => String)
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @Field(() => String)
-    @UpdateDateColumn()
-    updatedAt: Date;
-    
 }
 
 
