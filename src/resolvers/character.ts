@@ -1,10 +1,9 @@
 import { Character } from "../entities/Character";
 import { User } from "../entities/User";
 import { MyContext } from "../types";
-import { validateRegister } from "src/utils/validateRegister";
-import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, ObjectType, Query, Resolver, Root } from "type-graphql";
-import { SpellEditResponse } from "./spell";
-import { Spell } from "../entities/Spell";
+import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
+import { isAuth } from "../middleware/isAuth";
+import { LearnedSpell } from "../entities/LearnedSpell";
 
 
 @ObjectType()
@@ -18,62 +17,67 @@ character?: Character;
 
 @Resolver(Character)
 export class CharacterResolver {
-    // learn spell
-    // unlearn spell
-
-    @FieldResolver(() => [Spell], {nullable: true})
-    async spells(
-        @Root() character: Character, 
-        // @Ctx() {spellLoader}: MyContext
-    ): Promise<Spell[] | null> {
-        // console.log("inside spells resolver", character)
-        // const sIds = character.spells?.map(spell => spell.id)
-        // if(!sIds?.length) return null
-        // const stuff = await spellLoader.loadMany(sIds)
-        // console.log(stuff)
-        return character.spells ? character.spells : null
-
-    }
 
     @Query(() => Character, {nullable: true})
     async character(@Arg('cId') cId: number): Promise<Character | null> {
-        const character = await Character.findOne({where: { id: cId }, relations: {spells: true}})
-        console.log(character)
+        const character = await Character.findOne({where: { id: cId }, relations: {learnedSpells: true}})
         return character
     }
 
-    @Mutation(() => CharacterResponse)
-    async learnSpell(
-        @Arg("spellId") spellId: number,
-        @Arg("characterId") characterId: number,
-        // @Ctx() {req}: MyContext
-    ): Promise<CharacterResponse> {
+    @Query(() => [Character], {nullable: true})
+    @UseMiddleware(isAuth)
+    async myCharacters(
+        @Ctx() {req} :MyContext
+    ) {
+        return await Character.findBy({ownerId: req.session.userId})
+    }
 
-        const spell = await Spell.findOneBy({id: spellId})
-        if(!spell) return {error: 'Could not find the spell you\'re looking for'}
-        const character = await Character.findOne({where: {id: characterId}, relations: {spells: true}})
-        if(!character) return {error: 'Your mom'}
-        
-        const oldSpells = character.spells ? character.spells : []
-
-        console.log(character.spells)
-        character.spells = oldSpells.concat([spell])
-        console.log(character)
-        const newCharacter = await Character.save({...character})
-
-        console.log('What I am about to return', newCharacter)
-        return {character: newCharacter}
+    @FieldResolver(() => [LearnedSpell])
+    async learnedSpells(@Root() character: Character) {
+        const spells = await LearnedSpell.find({where: {charId: character.id}, relations: {spell: true}})
+        return spells
     }
 
     @Mutation(() => CharacterResponse)
+    @UseMiddleware(isAuth)
+    async forgetSpell(
+        @Arg("spellId") spellId: number,
+        @Arg("characterId") characterId: number,
+        @Ctx() {req}: MyContext
+    ): Promise<boolean> {
+        const character = await Character.findOne({where: {id: characterId}, relations: {learnedSpells: true}})
+        if(!character || character.ownerId !== req.session.userId) return false
+        await LearnedSpell.delete({charId: characterId, spellId: spellId})
+        return true
+    }
+
+    @Mutation(() => CharacterResponse)
+    @UseMiddleware(isAuth)
+    async learnSpell(
+        @Arg("spellId") spellId: number,
+        @Arg("characterId") characterId: number,
+        @Ctx() {req}: MyContext
+    ): Promise<CharacterResponse> {
+        const character = await Character.findOne({where: {id: characterId}, relations: {learnedSpells: true}})
+        if(!character || character.ownerId !== req.session.userId) return {error: 'Your mom'}
+        const learned = await LearnedSpell.save({
+            charId: characterId,
+            spellId 
+        })
+        const oldSpells = character.learnedSpells ? character.learnedSpells : []
+        const newSpells = oldSpells.concat(learned)
+        character.learnedSpells = newSpells
+        character.save()
+        return {character}
+    }
+
+    @Mutation(() => CharacterResponse)
+    @UseMiddleware(isAuth)
     async changeName(
       @Arg("characterId") characterId: number,
       @Arg("newName") name: string,
-      @Ctx() { req }: MyContext
     ): Promise<CharacterResponse> {
         if(name.length === 0) return {error: 'Please provide a name'}
-        const user = await User.findOneBy({id: req.session.userId})
-        if(!user) return {error: 'Please sign in'}
         const newCharacter = await Character.save({
             id: characterId,
             name: name,
@@ -82,32 +86,26 @@ export class CharacterResolver {
     }
 
     @Mutation(() => CharacterResponse)
+    @UseMiddleware(isAuth)
     async deleteCharacter(
       @Arg("characterId") characterId: number,
-      @Ctx() { req }: MyContext
     ): Promise<{error: string} | boolean> {
-        const user = await User.findOneBy({id: req.session.userId})
-        if(!user) return {error: 'Please sign in'}
-        const character = await Character.findOneBy({id: characterId})
-        if(!character) return {error: 'Could not find the character you\'re looking for'}
-        if(character.owner.id !== req.session.userId) return {error: 'You do not own this character'}
-        
         await Character.delete({id: characterId})
-
         return true
     }
 
     @Mutation(() => CharacterResponse)
+    @UseMiddleware(isAuth)
     async createCharacter(
       @Arg("name") name: string,
       @Ctx() { req }: MyContext
     ): Promise<CharacterResponse> {
         if(name.length === 0) return {error: 'Please provide a name'}
-        const user = await User.findOneBy({id: req.session.userId})
-        if(!user) return {error: 'Please sign in'}
+
+        const owner = await User.findOneBy({id: req.session.userId}) as User
 
         const newCharacter = await Character.save({
-            owner: user,
+            owner,
             name: name,
         })
 

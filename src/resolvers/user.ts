@@ -202,7 +202,6 @@ import { sendEmail } from "../utils/sendEmail";
   
 
       req.session.userId = user.id;
-      console.log(req.session)
 
       return {
         user,
@@ -215,7 +214,6 @@ import { sendEmail } from "../utils/sendEmail";
         req.session.destroy((err) => {
           res.clearCookie(COOKIE_NAME);
           if (err) {
-            console.log(err);
             resolve(false);
             return;
           }

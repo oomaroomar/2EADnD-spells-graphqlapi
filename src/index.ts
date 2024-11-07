@@ -1,6 +1,5 @@
 import "reflect-metadata"
 import { ApolloServer } from "@apollo/server"
-import { startStandaloneServer } from "@apollo/server/standalone"
 import { expressMiddleware } from '@apollo/server/express4'
 import { DataSource } from "typeorm"
 import { Spell } from "./entities/Spell"
@@ -12,7 +11,6 @@ import session from "express-session"
 import RedisStore from 'connect-redis'
 import express from 'express'
 import cors from 'cors'
-import { MyContext } from "./types"
 import { __prod__ } from "./constants"
 import { User } from "./entities/User"
 import { UserResolver } from "./resolvers/user"
@@ -21,6 +19,7 @@ import { Character } from "./entities/Character"
 import {SpellPage} from './entities/SpellPage'
 import { CharacterResolver } from "./resolvers/character"
 import { createSpellLoader } from "./utils/createSpellLoader"
+import { LearnedSpell } from "./entities/LearnedSpell"
 
 declare module 'express-session' {
   interface SessionData {
@@ -42,7 +41,7 @@ const main = async () => {
     logging: true,
     // migrations: [path.join(__dirname, './migrations/*')],
     synchronize: true,
-    entities: [Spell, User, SpellBook, Character, SpellPage],
+    entities: [Spell, User, SpellBook, Character, SpellPage, LearnedSpell],
   })
 
   const app = express()

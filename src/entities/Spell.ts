@@ -1,10 +1,11 @@
 import { Book, Caster, Save, School, SpellInput, Sphere } from "src/types"
 import { Field, ObjectType, Int, InputType } from "type-graphql"
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index, Brackets, CreateDateColumn, UpdateDateColumn, ManyToMany, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index, Brackets, CreateDateColumn, UpdateDateColumn, ManyToMany, OneToMany, ManyToOne } from "typeorm"
 import { Cursor } from "src/types"
 import { Character } from "./Character"
 import { SpellBook } from "./SpellBook"
 import { SpellPage } from "./SpellPage"
+import { LearnedSpell } from "./LearnedSpell"
 
 
 // Index everything because data will be queries 10^6 times more often than it is mutated
@@ -109,6 +110,9 @@ export class Spell extends BaseEntity {
 
   @ManyToMany(() => Character, {nullable: true})
   characters: Character[]
+
+  @OneToMany(() => LearnedSpell, ls => ls.spellId)
+  spellKnowers: LearnedSpell[]
 
   @ManyToMany(() => SpellBook, {nullable: true})
   spellBooks: SpellBook[]
