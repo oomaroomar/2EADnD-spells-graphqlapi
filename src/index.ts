@@ -21,6 +21,7 @@ import { CharacterResolver } from "./resolvers/character"
 import { createSpellLoader } from "./utils/createSpellLoader"
 import { LearnedSpell } from "./entities/LearnedSpell"
 import { SpellBookResolver } from "./resolvers/spellBook"
+import { SpellpageResolver } from "./resolvers/spellPage"
 
 declare module 'express-session' {
   interface SessionData {
@@ -54,7 +55,7 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [SpellResolver, UserResolver, CharacterResolver, SpellBookResolver],
+      resolvers: [SpellResolver, UserResolver, CharacterResolver, SpellBookResolver, SpellpageResolver],
       validate: {forbidUnknownValues: false}
     }),
     formatError: errorFormatter,

@@ -66,7 +66,7 @@ export class SpellInput {
   name!: string
 
   @Field()
-  school: School
+  school!: School
 
   @Field()
   class!: Caster
@@ -103,9 +103,6 @@ export class SpellInput {
 
   @Field()
   description: string
-
-  @Field()
-  source: Book
 
   @Field(() => [String],{nullable: true})
   spheres: string[]

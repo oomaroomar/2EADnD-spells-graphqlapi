@@ -1,5 +1,4 @@
 import { Character } from "../entities/Character";
-import { User } from "../entities/User";
 import { MyContext } from "../types";
 import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
@@ -20,22 +19,18 @@ export class CharacterResolver {
 
     @Query(() => Character, {nullable: true})
     async character(@Arg('cId') cId: number): Promise<Character | null> {
-        const character = await Character.findOne({where: { id: cId }, relations: {learnedSpells: true}})
-        return character
+        return await Character.findOne({where: { id: cId }, relations: {learnedSpells: true}})
     }
 
     @Query(() => [Character], {nullable: true})
     @UseMiddleware(isAuth)
-    async myCharacters(
-        @Ctx() {req} :MyContext
-    ) {
+    async myCharacters(@Ctx() {req} :MyContext): Promise<Character[]> {
         return await Character.findBy({ownerId: req.session.userId})
     }
 
     @FieldResolver(() => [LearnedSpell])
-    async learnedSpells(@Root() character: Character) {
-        const spells = await LearnedSpell.find({where: {charId: character.id}, relations: {spell: true}})
-        return spells
+    async learnedSpells(@Root() character: Character): Promise<LearnedSpell[]> {
+        return await LearnedSpell.find({where: {charId: character.id}, relations: {spell: true}})
     }
 
     @Mutation(() => CharacterResponse)
@@ -45,8 +40,8 @@ export class CharacterResolver {
         @Arg("characterId") characterId: number,
         @Ctx() {req}: MyContext
     ): Promise<boolean> {
-        const character = await Character.findOne({where: {id: characterId}, relations: {learnedSpells: true}})
-        if(!character || character.ownerId !== req.session.userId) return false
+        const character = await Character.findOne({where: {id: characterId, ownerId: req.session.userId}, relations: {learnedSpells: true}})
+        if(!character) return false
         await LearnedSpell.delete({charId: characterId, spellId: spellId})
         return true
     }
@@ -101,14 +96,10 @@ export class CharacterResolver {
       @Ctx() { req }: MyContext
     ): Promise<CharacterResponse> {
         if(name.length === 0) return {error: 'Please provide a name'}
-
-        const owner = await User.findOneBy({id: req.session.userId}) as User
-
         const newCharacter = await Character.save({
-            owner,
+            ownerId: req.session.userId,
             name: name,
         })
-
         return {character: newCharacter}
     }
 }

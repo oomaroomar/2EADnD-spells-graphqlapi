@@ -2,7 +2,6 @@ import { ObjectType, Field, Int } from "type-graphql";
 import { Entity, BaseEntity, ManyToOne, Column, CreateDateColumn, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { Spell } from "./Spell";
 import { SpellBook } from "./SpellBook";
-import { Character } from "./Character";
 
 
 @ObjectType()
@@ -20,11 +19,11 @@ export class SpellPage extends BaseEntity {
     @Field()
     bookId!: number
 
-    @ManyToOne(() => SpellBook)
+    @ManyToOne(() => SpellBook, {onDelete: "CASCADE"})
     @Field(() => SpellBook)
     book: SpellBook
 
-    @Field()
-    @Column()
+    @Field(() => Int, {nullable: true})
+    @Column({nullable: true})
     pages: number
 }

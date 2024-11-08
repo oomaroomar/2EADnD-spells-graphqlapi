@@ -18,7 +18,6 @@ export class SpellBook extends BaseEntity {
 
     @Field(() => User)
     @ManyToOne(() => User)
-    @Index()
     userOwner!: User
 
     @Field()
@@ -28,7 +27,6 @@ export class SpellBook extends BaseEntity {
 
     @Field(() => Character)
     @ManyToOne(() => Character)
-    @Index()
     owner!: Character
 
     @Field(() => SpellPage, {nullable: true})
@@ -43,6 +41,11 @@ export class SpellBook extends BaseEntity {
     @Field(() => Int, {nullable: true})
     @Column({nullable: true})
     maxPages: number
+
+    static async pagesLeft(spellBook: SpellBook) {
+        const writtenPages = await SpellPage.findBy({bookId: spellBook.id})
+        return spellBook.maxPages - writtenPages.reduce((acc, cur) => acc + cur.pages, 0)
+    }
 }
 
 

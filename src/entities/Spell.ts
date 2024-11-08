@@ -6,6 +6,7 @@ import { Character } from "./Character"
 import { SpellBook } from "./SpellBook"
 import { SpellPage } from "./SpellPage"
 import { LearnedSpell } from "./LearnedSpell"
+import { User } from "./User"
 
 
 // Index everything because data will be queries 10^6 times more often than it is mutated
@@ -90,9 +91,8 @@ export class Spell extends BaseEntity {
   @Column()
   description: string
 
-  @Field()
   @Index()
-  @Column()
+  @Column({nullable: true})
   source: Book
 
   @Field(() => [String], {nullable: true})
@@ -107,6 +107,14 @@ export class Spell extends BaseEntity {
   @Field(() => String)
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Field({nullable: true})
+  @Column({nullable: true})
+  @Index()
+  creatorId!: number
+
+  @ManyToOne(() => User, {nullable: true})
+  creator: User
 
   @OneToMany(() => LearnedSpell, ls => ls.spellId)
   spellKnowers: LearnedSpell[]

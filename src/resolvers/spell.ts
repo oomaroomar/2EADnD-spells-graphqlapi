@@ -5,13 +5,17 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   Int,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
+  UseMiddleware,
 } from "type-graphql"
 import { User } from "../entities/User"
+import { isAuth } from "../middleware/isAuth"
 
 @ObjectType()
 class PaginatedSpells {
@@ -39,6 +43,12 @@ export class SpellEditResponse {
 
 @Resolver(Spell)
 export class SpellResolver {
+  @FieldResolver(() => String)
+  async source(@Root() spell: Spell) {
+    return spell.source ? spell.source : (await User.findOneBy({id: spell.creatorId}))?.username
+  }
+
+
   @Query(() => Spell)
   async spellByID(
     @Arg("id", () => Int) id: number,
@@ -94,35 +104,63 @@ export class SpellResolver {
   }
 
   @Mutation(() => Spell)
-  async createSpell(@Arg("spellInfo") spellInfo: SpellInput): Promise<Spell | null> {
-    return Spell.create({ ...spellInfo }).save()
+  @UseMiddleware(isAuth)
+  async createSpell(
+    @Arg("spellInfo") spellInfo: SpellInput,
+    @Ctx() {req}: MyContext
+  ): Promise<Spell | null> {
+    return Spell.create({ ...spellInfo, creatorId: req.session.userId}).save()
   }
 
   @Mutation(() => SpellEditResponse)
+  @UseMiddleware(isAuth)
   async updateSpell(
     @Arg("spellInfo", () => SpellEditInput) spellInfo: SpellEditInput,
     @Ctx() {req}: MyContext
   ): Promise<SpellEditResponse> {
-    if (!req.session.userId) {
-      return {error: "You do not have access to edit this spell"}
-    }
     const user = await User.findOneBy({id: req.session.userId})
     if(user?.isAdmin) {
-      const updatedSpell = await Spell.save({...spellInfo})
+     const updatedSpell = await Spell.save({...spellInfo})
       return {spell: updatedSpell}
     } 
-    return {error: "You do not have access to edit this spell"}
+    const result = await Spell.createQueryBuilder()
+      .update(Spell)
+      .set({...spellInfo})
+      .where('id = :sId and creatorId = :cId', {
+          sId: spellInfo.id,
+          cId: req.session.userId
+      })
+      .returning('*')
+      .execute()
+
+    return result.raw[0] ? result.raw[0] : {error: "You do not have access to edit this spell"}
   }
 
-  @Mutation(() => [Spell])
-  async createSpells(@Arg("spellArray", () => [SpellInput]) spellArray: SpellInput[]): Promise<boolean> {
-    const savedSpells = spellArray.map(async spell => await Spell.create({...spell}).save())
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async createSpells(
+    @Arg("spellArray", () => [SpellInput]) spellArray: SpellInput[],
+    @Ctx(){req}: MyContext
+  ): Promise<Boolean> {
+    const isAdmin = (await User.findOneBy({id: req.session.userId}))?.isAdmin
+    if(!isAdmin) return false
+    spellArray.map(async spell => await Spell.create({...spell}).save())
     return true
   }
 
   @Mutation(() => Spell)
-  async deleteSpell(@Arg("id") id: number): Promise<boolean> {
-    await Spell.delete({id})
+  @UseMiddleware(isAuth)
+  async deleteSpell(
+    @Arg("id") id: number,
+    @Ctx() {req} : MyContext
+  ): Promise<boolean> {
+    const isAdmin = (await User.findOneBy({id: req.session.userId}))?.isAdmin
+    if(isAdmin) {
+      await Spell.delete({id})
+    } else {
+      // If user is not admin, the spells creatorId must match the users id
+      await Spell.delete({id, creatorId: req.session.userId})
+    }
     return true
   }
 }
