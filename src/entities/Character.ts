@@ -11,7 +11,6 @@ export class Character extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Field()
     @Column()
     ownerId!: number
     

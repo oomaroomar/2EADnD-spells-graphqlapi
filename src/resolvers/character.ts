@@ -3,6 +3,7 @@ import { MyContext } from "../types";
 import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { LearnedSpell } from "../entities/LearnedSpell";
+import { SpellBook } from "../entities/SpellBook";
 
 
 @ObjectType()
@@ -19,18 +20,23 @@ export class CharacterResolver {
 
     @Query(() => Character, {nullable: true})
     async character(@Arg('cId') cId: number): Promise<Character | null> {
-        return await Character.findOne({where: { id: cId }, relations: {learnedSpells: true}})
+        return await Character.findOne({where: { id: cId }, relations: {spellBooks: true}})
     }
 
     @Query(() => [Character], {nullable: true})
     @UseMiddleware(isAuth)
     async myCharacters(@Ctx() {req} :MyContext): Promise<Character[]> {
-        return await Character.findBy({ownerId: req.session.userId})
+        return (await Character.find({where: {ownerId: req.session.userId}}))
     }
 
     @FieldResolver(() => [LearnedSpell])
     async learnedSpells(@Root() character: Character): Promise<LearnedSpell[]> {
         return await LearnedSpell.find({where: {charId: character.id}, relations: {spell: true}})
+    }
+
+    @FieldResolver(() => [SpellBook])
+    async spellBooks(@Root() character: Character): Promise<SpellBook[]> {
+        return await SpellBook.find({where: {ownerId: character.id}})
     }
 
     @Mutation(() => CharacterResponse)

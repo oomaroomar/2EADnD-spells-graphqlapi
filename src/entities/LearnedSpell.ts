@@ -7,7 +7,6 @@ import { Character } from "./Character";
 @ObjectType()
 @Entity()
 export class LearnedSpell extends BaseEntity {
-    @Field()
     @PrimaryColumn()
     spellId!: number
 
@@ -16,11 +15,9 @@ export class LearnedSpell extends BaseEntity {
     spell!: Spell
 
     @PrimaryColumn()
-    @Field()
     charId!: number
 
     @ManyToOne(() => Character, char => char.learnedSpells)
-    @Field(() => Character)
     character: Character
 
     @Field(() => Int, {nullable: true})

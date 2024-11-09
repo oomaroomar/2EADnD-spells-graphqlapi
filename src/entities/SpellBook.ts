@@ -11,16 +11,13 @@ export class SpellBook extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Field()
     @Column()
     @Index()
     userOwnerId!: number
 
-    @Field(() => User)
     @ManyToOne(() => User)
     userOwner!: User
 
-    @Field()
     @Column()
     @Index()
     ownerId!: number

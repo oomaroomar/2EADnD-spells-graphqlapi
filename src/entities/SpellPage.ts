@@ -7,20 +7,17 @@ import { SpellBook } from "./SpellBook";
 @ObjectType()
 @Entity()
 export class SpellPage extends BaseEntity {
-    @Field()
     @PrimaryColumn()
+    @Field()
     spellId!: number
 
     @ManyToOne(() => Spell, spell => spell.spellKnowers)
-    @Field(() => Spell)
     spell!: Spell
 
     @PrimaryColumn()
-    @Field()
     bookId!: number
 
     @ManyToOne(() => SpellBook, {onDelete: "CASCADE"})
-    @Field(() => SpellBook)
     book: SpellBook
 
     @Field(() => Int, {nullable: true})
