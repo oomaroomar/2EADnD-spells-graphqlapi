@@ -20,7 +20,7 @@ export class CharacterResolver {
 
     @Query(() => Character, {nullable: true})
     async character(@Arg('cId') cId: number): Promise<Character | null> {
-        return await Character.findOne({where: { id: cId }, relations: {spellBooks: true}})
+        return await Character.findOne({where: { id: cId }})
     }
 
     @Query(() => [Character], {nullable: true})
