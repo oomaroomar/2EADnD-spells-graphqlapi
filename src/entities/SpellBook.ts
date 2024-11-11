@@ -26,9 +26,9 @@ export class SpellBook extends BaseEntity {
     @ManyToOne(() => Character)
     owner!: Character
 
-    @Field(() => SpellPage, {nullable: true})
+    @Field(() => [SpellPage], {nullable: true})
     @OneToMany(() => SpellPage, sp => sp.book)
-    spellPages?: SpellPage
+    spellPages?: SpellPage[]
 
     @Field(() => String)
     @Column()

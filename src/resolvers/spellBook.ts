@@ -25,6 +25,13 @@ export class SpellBookResolver {
         return await SpellBook.findBy({ownerId: cid})
     }
 
+    @Query(() => SpellBook)
+    async spellbook(@Arg('bookId') bId: number): Promise<SpellBook | null> {
+       const book =  await SpellBook.findOne({where: {id: bId}, relations: {spellPages: true}})
+       if(!book) return null
+       return book
+    }
+
     @FieldResolver(() => Character)
     async owner(@Root() spellBook: SpellBook) {
        return await Character.findOneBy({id: spellBook.ownerId})
@@ -35,12 +42,14 @@ export class SpellBookResolver {
         return await SpellBook.pagesLeft(spellBook)
     }
 
-    @FieldResolver(() => SpellPage)
+    @FieldResolver(() => [SpellPage])
     async spellPages(@Root() spellBook: SpellBook) {
+        console.log("hello")
         const spellPages = await SpellPage.createQueryBuilder("sp")
             .leftJoinAndSelect("sp.spell", 'spell')
             .where("sp.bookId = :bkId", {bkId: spellBook.id})
             .getMany()
+        console.log(spellPages)
         return spellPages
     }
 
