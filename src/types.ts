@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { Redis } from "ioredis"
-import { InputType, Field } from "type-graphql"
+import { InputType, Field, ObjectType } from "type-graphql"
 import { createSpellLoader } from "./utils/createSpellLoader"
 
 export type MyContext = {
@@ -19,6 +19,7 @@ export interface Cursor {
 export type Book = "PHB" | "ToM" | "S&M" | string
 export type Save = "Negate" | "None" | "1/2" | "Special"
 export type Caster = "Wizard" | "Cleric"
+
 export type School =
   | "Abjuration"
   | "Alteration"
@@ -65,8 +66,8 @@ export class SpellInput {
   @Field()
   name!: string
 
-  @Field()
-  school!: School
+  @Field(() => [String])
+  schools!: string[]
 
   @Field()
   class!: Caster
@@ -106,6 +107,9 @@ export class SpellInput {
 
   @Field(() => [String],{nullable: true})
   spheres: string[]
+
+  // @Field()
+  // source: string
 }
 
 @InputType()

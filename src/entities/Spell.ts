@@ -27,10 +27,10 @@ export class Spell extends BaseEntity {
   @Index()
   name!: string
 
-  @Field()
-  @Column()
+  @Field(() => [String])
   @Index()
-  school: School
+  @Column({type: 'text', array: true})
+  schools!: string[]
 
   @Field()
   @Index()

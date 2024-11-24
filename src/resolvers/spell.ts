@@ -137,13 +137,13 @@ export class SpellResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseMiddleware(isAuth)
+  // @UseMiddleware(isAuth)
   async createSpells(
     @Arg("spellArray", () => [SpellInput]) spellArray: SpellInput[],
-    @Ctx(){req}: MyContext
+    // @Ctx(){req}: MyContext
   ): Promise<Boolean> {
-    const isAdmin = (await User.findOneBy({id: req.session.userId}))?.isAdmin
-    if(!isAdmin) return false
+    // const isAdmin = (await User.findOneBy({id: req.session.userId}))?.isAdmin
+    // if(!isAdmin) return false
     spellArray.map(async spell => await Spell.create({...spell}).save())
     return true
   }
